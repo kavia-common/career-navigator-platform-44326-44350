@@ -1,12 +1,19 @@
-import os
 from typing import List
 
 from fastapi import FastAPI, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 from .databases.db import engine, get_db
-from .models.models import Base, Role
+from .models.models import Base
 from .services.seed import seed_roles_and_skills
+from .settings import get_settings
+from .routers import roles as roles_router
+from .routers import analysis as analysis_router
+from .routers import progress as progress_router
+
+# Initialize settings first
+settings = get_settings()
 
 app = FastAPI(
     title="Career Navigator Backend API",
@@ -15,7 +22,18 @@ app = FastAPI(
     openapi_tags=[
         {"name": "health", "description": "Health and readiness checks"},
         {"name": "roles", "description": "Role and skill framework access"},
+        {"name": "analysis", "description": "Gap analysis and roadmap generation"},
+        {"name": "progress", "description": "User progress tracking"},
     ],
+)
+
+# Enable CORS based on settings
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_allow_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -49,16 +67,7 @@ def health() -> dict:
     return {"status": "ok"}
 
 
-# PUBLIC_INTERFACE
-@app.get("/roles", tags=["roles"], summary="List all roles")
-def list_roles(db: Session = Depends(get_db)) -> List[dict]:
-    """Return all roles with id, name, and description.
-
-    Args:
-        db (Session): Injected SQLAlchemy session.
-
-    Returns:
-        List[dict]: Array of role objects.
-    """
-    roles = db.query(Role).order_by(Role.name.asc()).all()
-    return [{"id": r.id, "name": r.name, "description": r.description} for r in roles]
+# Mount routers
+app.include_router(roles_router.router, prefix="")
+app.include_router(analysis_router.router, prefix="")
+app.include_router(progress_router.router, prefix="")

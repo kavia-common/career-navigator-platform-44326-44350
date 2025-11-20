@@ -217,7 +217,7 @@ def seed_roles_and_skills(db: Session) -> None:
     }
     for name in all_skill_names:
         if name not in existing_skills:
-            db.add(Skill(name=name, description=f"{name} competency")))
+            db.add(Skill(name=name, description=f"{name} competency"))
     db.commit()
     # Refresh skill cache
     existing_skills = {s.name: s for s in db.query(Skill).filter(Skill.name.in_(list(all_skill_names))).all()}

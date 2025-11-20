@@ -9,11 +9,11 @@ WORKDIR /app
 # System deps for psycopg2
 RUN apt-get update && apt-get install -y build-essential libpq-dev && rm -rf /var/lib/apt/lists/*
 
-# Copy minimal requirements inline to avoid separate file for this step
-# PUBLIC_INTERFACE
-# If you maintain a separate requirements.txt later, adjust this section accordingly.
-RUN pip install --no-cache-dir fastapi==0.115.5 uvicorn[standard]==0.32.0 sqlalchemy==2.0.36 psycopg2-binary==2.9.10 pydantic==2.9.2
+# Install dependencies
+COPY requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
 
+# Copy source
 COPY src /app/src
 
 # The application will read DATABASE_URL if provided; otherwise, it will construct
