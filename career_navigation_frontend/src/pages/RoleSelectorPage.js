@@ -39,9 +39,9 @@ export default function RoleSelectorPage() {
       <div style={{ marginTop: 12, ...card }}>
         <strong>Summary</strong>
         <div style={{ color: colors.textMuted }}>
-          Current: {selectedCurrentRole ? selectedCurrentRole.name : "—"} | Target:{" "}
+          Current: {selectedCurrentRole ? selectedCurrentRole.name : "—"} | Target{" "}
           {selectedTargetRole ? selectedTargetRole.name : "—"} ·
-          {' '}Select a role to preview its skills below.
+          {' '}Select a role to preview its skills below. When both are selected, visit the Roadmap section to see your milestone plan.
         </div>
       </div>
 

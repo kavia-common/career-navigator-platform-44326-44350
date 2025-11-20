@@ -2,13 +2,15 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useAppState } from "../context/AppStateContext";
 import useMindMap from "../hooks/useMindMap";
 import MindMapView from "../components/MindMapView";
+import RoadmapView from "../components/RoadmapView.jsx";
 import { postGapAnalysis } from "../api";
 
 /**
  * PUBLIC_INTERFACE
  * RoadmapPage
- * Displays a roadmap generated from the most recent gap analysis result.
- * If no gap result is available, the page attempts to run analysis using selected roles.
+ * Displays a visual roadmap and a lightweight mind-map preview derived from analysis.
+ * - RoadmapView uses selected target role to build a milestone timeline from required_skills.
+ * - MindMapView below shows the node/edge preview from gap-based roadmap generation (optional).
  */
 export default function RoadmapPage() {
   const { selectedCurrentRole, selectedTargetRole } = useAppState();
@@ -33,9 +35,9 @@ export default function RoadmapPage() {
   const currentRoleId = selectedCurrentRole?.id ?? null;
   const targetRoleId = selectedTargetRole?.id ?? null;
 
-  const { gaps, roadmap, loading: roadmapLoading, error: roadmapError, ensureFromAnalysis } = useMindMap();
+  const { roadmap, loading: roadmapLoading, error: roadmapError, ensureFromAnalysis } = useMindMap();
 
-  // Attempt to auto-run analysis and build roadmap when both roles are selected
+  // Auto-run analysis and build mind-map style roadmap for the preview list below when roles are selected
   useEffect(() => {
     let ignore = false;
     (async () => {
@@ -70,7 +72,7 @@ export default function RoadmapPage() {
       <div style={card}>
         <h2 style={header}>Roadmap</h2>
         <p style={{ color: colors.textMuted, marginTop: -8 }}>
-          A structured view of how to progress from your current role to the target role. This preview lists nodes and edges; a visual graph can be connected later.
+          A structured, visual plan based on the target role’s required skills. Use expand/collapse to reveal sub-skills, durations, and dependencies if available.
         </p>
         <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
           <div style={{ alignSelf: "center", color: colors.textMuted, fontSize: 13 }}>
@@ -82,7 +84,7 @@ export default function RoadmapPage() {
             onClick={() => ensureFromAnalysis({ currentRoleId, targetRoleId, runIfMissing: true, lastGapResult })}
             disabled={!hasRoles || analysisLoading || roadmapLoading}
           >
-            {analysisLoading || roadmapLoading ? "Building…" : "Rebuild Roadmap"}
+            {analysisLoading || roadmapLoading ? "Building…" : "Rebuild Analysis-based Preview"}
           </button>
         </div>
         {(!hasRoles || autoMessage) && (
@@ -98,7 +100,11 @@ export default function RoadmapPage() {
       </div>
 
       <div style={{ marginTop: 12 }}>
-        <MindMapView nodes={roadmap?.nodes || []} edges={roadmap?.edges || []} />
+        <RoadmapView roleId={targetRoleId} title="Milestone Roadmap" />
+      </div>
+
+      <div style={{ marginTop: 12 }}>
+        <MindMapView nodes={roadmap?.nodes || []} edges={roadmap?.edges || []} title="Mind Map Preview" />
       </div>
     </section>
   );
