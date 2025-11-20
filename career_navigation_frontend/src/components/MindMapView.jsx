@@ -108,6 +108,43 @@ export default function MindMapView({ currentRole, targetRole, analysisData = nu
 
     const g = gRoot.append('g');
 
+    // Minimal diagnostics
+    try {
+      console.debug(
+        '[MindMapView] init',
+        { width, height },
+        { nodes: visibleGraph?.nodes?.length || 0, links: visibleGraph?.links?.length || 0 }
+      );
+    } catch {}
+
+    // Define helpers BEFORE using them in forces to avoid temporal dead zone issues
+    // Defensive nodeRadius: ensure function exists and returns a sane default
+    const nodeRadius = (d) => {
+      try {
+        switch (d?.type) {
+          case 'role-current':
+          case 'role-target':
+            return 24;
+          case 'domain':
+            return 18;
+          case 'skill':
+            return 14;
+          case 'gap':
+            return 12;
+          case 'recommendation':
+            return 10;
+          case 'sub-skill':
+            return 8;
+          default:
+            return 10;
+        }
+      } catch (e) {
+        // Fallback to avoid crashing simulation if unexpected data
+        console.warn('nodeRadius error, using fallback radius=10', e, d);
+        return 10;
+      }
+    };
+
     // Force layout
     const sim = d3
       .forceSimulation(visibleGraph.nodes)
@@ -117,7 +154,7 @@ export default function MindMapView({ currentRole, targetRole, analysisData = nu
           .forceLink(visibleGraph.links)
           .id((d) => d.id)
           .distance((l) => {
-            const rel = l.relation || '';
+            const rel = l?.relation || '';
             if (rel.includes('transition')) return 120;
             if (rel.includes('domain')) return 160;
             if (rel.includes('needs-upskill')) return 100;
@@ -128,7 +165,19 @@ export default function MindMapView({ currentRole, targetRole, analysisData = nu
       )
       .force('charge', d3.forceManyBody().strength(-260))
       .force('center', d3.forceCenter(width / 2, height / 2))
-      .force('collision', d3.forceCollide().radius((d) => nodeRadius(d) + 10));
+      .force(
+        'collision',
+        d3.forceCollide().radius((d) => {
+          // Defensive guard to ensure nodeRadius is callable
+          try {
+            const r = typeof nodeRadius === 'function' ? nodeRadius(d) : 10;
+            return (Number.isFinite(r) ? r : 10) + 10;
+          } catch (e) {
+            console.warn('collision radius fallback used', e, d);
+            return 20;
+          }
+        })
+      );
 
     // Color mapping
     const colorForType = (type) => {
@@ -151,25 +200,7 @@ export default function MindMapView({ currentRole, targetRole, analysisData = nu
       }
     };
 
-    const nodeRadius = (d) => {
-      switch (d.type) {
-        case 'role-current':
-        case 'role-target':
-          return 24;
-        case 'domain':
-          return 18;
-        case 'skill':
-          return 14;
-        case 'gap':
-          return 12;
-        case 'recommendation':
-          return 10;
-        case 'sub-skill':
-          return 8;
-        default:
-          return 10;
-      }
-    };
+
 
     // Links
     const link = g
@@ -209,7 +240,14 @@ export default function MindMapView({ currentRole, targetRole, analysisData = nu
     node
       .append('text')
       .text((d) => d.label)
-      .attr('x', (d) => nodeRadius(d) + 8)
+      .attr('x', (d) => {
+        try {
+          const r = typeof nodeRadius === 'function' ? nodeRadius(d) : 10;
+          return (Number.isFinite(r) ? r : 10) + 8;
+        } catch {
+          return 18;
+        }
+      })
       .attr('y', 4)
       .attr('font-size', 12)
       .attr('fill', colors.text)
