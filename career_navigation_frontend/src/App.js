@@ -1,6 +1,8 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Link, NavLink, Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom';
 import { getRoles, getRole, postGapAnalysis, postRecommend, postRoadmap, postProgressUpdate, isMockMode } from './api';
+import { AppStateProvider, useAppState } from './context/AppStateContext';
+import RoleSelectorPage from './pages/RoleSelectorPage';
 
 /**
  * PUBLIC_INTERFACE
@@ -77,6 +79,7 @@ function keyActivate(handler) {
 // Sidebar items
 const NAV_ITEMS = [
   { to: '/', label: 'Dashboard', icon: '🏠' },
+  { to: '/role-selector', label: 'Role Selector', icon: '🎯' },
   { to: '/roles', label: 'Roles', icon: '📋' },
   { to: '/analysis', label: 'Analysis', icon: '🧪' },
   { to: '/paths', label: 'Paths', icon: '🧭' },
@@ -192,10 +195,19 @@ function RoleDetail() {
 
 // PUBLIC_INTERFACE
 function AnalysisPage() {
-  const [currentId, setCurrentId] = useState(1);
-  const [targetId, setTargetId] = useState(2);
+  const { selectedCurrentRole, selectedTargetRole } = useAppState();
+  const [currentId, setCurrentId] = useState(selectedCurrentRole?.id ?? 1);
+  const [targetId, setTargetId] = useState(selectedTargetRole?.id ?? 2);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (selectedCurrentRole?.id) setCurrentId(selectedCurrentRole.id);
+  }, [selectedCurrentRole?.id]);
+  useEffect(() => {
+    if (selectedTargetRole?.id) setTargetId(selectedTargetRole.id);
+  }, [selectedTargetRole?.id]);
+
   const run = async () => {
     setLoading(true);
     setResult(null);
@@ -395,7 +407,7 @@ function ConnectivityPanel() {
 }
 
 // Root App
-function App() {
+function AppShell() {
   const location = useLocation();
   const [searchTerm, setSearchTerm] = useState('');
   const [searching, setSearching] = useState(false);
@@ -461,6 +473,7 @@ function App() {
 
           <Routes>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/role-selector" element={<RoleSelectorPage />} />
             <Route path="/roles" element={<RolesList />} />
             <Route path="/roles/:id" element={<RoleDetail />} />
             <Route path="/analysis" element={<AnalysisPage />} />
@@ -497,6 +510,14 @@ function App() {
         `}
       </style>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <AppStateProvider>
+      <AppShell />
+    </AppStateProvider>
   );
 }
 

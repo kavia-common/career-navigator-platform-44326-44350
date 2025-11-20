@@ -1,0 +1,7 @@
+[
+  { "id": 101, "name": "Python", "description": "Python programming proficiency" },
+  { "id": 102, "name": "APIs", "description": "RESTful and GraphQL API design" },
+  { "id": 201, "name": "System Design", "description": "Architecting scalable systems" },
+  { "id": 202, "name": "Cloud (AWS/GCP/Azure)", "description": "Foundational cloud services" },
+  { "id": 301, "name": "Leadership", "description": "Leading teams and initiatives" }
+]

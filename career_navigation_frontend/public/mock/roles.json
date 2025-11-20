@@ -1,0 +1,7 @@
+[
+  { "id": 1, "name": "Senior Engineer", "description": "Experienced engineer driving delivery." },
+  { "id": 2, "name": "Staff Engineer", "description": "Technical leader across teams." },
+  { "id": 3, "name": "Principal Engineer", "description": "System-wide impact and architecture." },
+  { "id": 4, "name": "Engineering Manager", "description": "Leads teams and delivery outcomes." },
+  { "id": 5, "name": "Product Manager", "description": "Owns product strategy and roadmaps." }
+]
