@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import useRecommendations from "../hooks/useRecommendations";
 
 /**
  * PUBLIC_INTERFACE
@@ -46,6 +47,8 @@ export default function GapAnalysisView({ result, onRecommendClick }) {
   const item = { border: `1px solid ${colors.border}`, borderRadius: 10, padding: 12, background: '#fff' };
   const gapHeader = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 };
   const btnSmall = { background: colors.secondary, color: '#111827', padding: '6px 10px', borderRadius: 10, border: 'none', fontWeight: 700, fontSize: 12, cursor: 'pointer', boxShadow: '0 2px 8px rgba(245,158,11,0.25)' };
+
+  const { getForSkill, getCached } = useRecommendations();
 
   function toggleExpand(id) {
     setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -116,18 +119,16 @@ export default function GapAnalysisView({ result, onRecommendClick }) {
                         padding: 10,
                       }}
                     >
-                      {/* Placeholder RecommendationCard */}
-                      <div style={{ fontWeight: 600, color: colors.primary, marginBottom: 6 }}>
-                        Recommendation
-                      </div>
-                      <div style={{ color: colors.textMuted, fontSize: 14 }}>
-                        {rec?.suggestion
-                          ? rec.suggestion
-                          : `Explore curated learning steps and a practice project to raise your ${g.name} competency.`}
-                      </div>
-                      <div style={{ marginTop: 8, fontSize: 12, color: colors.textMuted }}>
-                        Tip: This is a placeholder card. In Milestone 3, hook it to the LLM Recommendations service for full details.
-                      </div>
+                      {/* Enhanced inline Recommendation preview using useRecommendations cache */}
+                      <InlineRecommendation
+                        skillId={g.id}
+                        skillName={g.name}
+                        requiredLevel={g.requiredLevel}
+                        placeholderSuggestion={rec?.suggestion}
+                        colors={colors}
+                        getForSkill={getForSkill}
+                        getCached={getCached}
+                      />
                     </div>
                   )}
                 </li>
@@ -146,6 +147,79 @@ export default function GapAnalysisView({ result, onRecommendClick }) {
           }
         `}
       </style>
+    </div>
+  );
+}
+
+/**
+ * InlineRecommendation - lightweight recommendation preview card.
+ * Fetches via useRecommendations keyed by skillId + level and displays a compact snippet.
+ */
+function InlineRecommendation({ skillId, skillName, requiredLevel, placeholderSuggestion, colors, getForSkill, getCached }) {
+  const [loading, setLoading] = useState(false);
+  const [fetched, setFetched] = useState(() => getCached({ skillId, level: requiredLevel }) || null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let ignore = false;
+    // If not cached, fetch on mount
+    if (!fetched) {
+      (async () => {
+        setLoading(true);
+        setError(null);
+        try {
+          const res = await getForSkill({ skillId, skillName, level: requiredLevel, skillDescription: `${skillName} upskilling to level ${requiredLevel}` });
+          if (!ignore) setFetched(res);
+        } catch (e) {
+          if (!ignore) setError(e?.uiMessage || e?.message || "Failed to fetch recommendations");
+        } finally {
+          if (!ignore) setLoading(false);
+        }
+      })();
+    }
+    return () => { ignore = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [skillId, requiredLevel]);
+
+  return (
+    <div>
+      <div style={{ fontWeight: 600, color: colors.primary, marginBottom: 6 }}>
+        Recommendation
+      </div>
+      {loading && <div style={{ color: colors.textMuted, fontSize: 14 }}>Loading recommendations…</div>}
+      {error && <div role="alert" style={{ color: '#DC2626', fontSize: 14 }}>{error}</div>}
+      {!loading && !error && fetched && (
+        <div style={{ color: colors.textMuted, fontSize: 14 }}>
+          <div style={{ marginBottom: 6 }}>
+            <strong>Steps:</strong>
+            <ul style={{ margin: '6px 0 0 18px' }}>
+              {fetched.steps.slice(0, 2).map((s, i) => (<li key={i}>{s}</li>))}
+            </ul>
+          </div>
+          <div style={{ marginBottom: 6 }}>
+            <strong>Resources:</strong>
+            <ul style={{ margin: '6px 0 0 18px' }}>
+              {fetched.resources.slice(0, 2).map((s, i) => (<li key={i}>{s}</li>))}
+            </ul>
+          </div>
+          <div>
+            <strong>Project idea:</strong>
+            <ul style={{ margin: '6px 0 0 18px' }}>
+              {fetched.projects.slice(0, 1).map((s, i) => (<li key={i}>{s}</li>))}
+            </ul>
+          </div>
+        </div>
+      )}
+      {!loading && !error && !fetched && (
+        <div style={{ color: colors.textMuted, fontSize: 14 }}>
+          {placeholderSuggestion
+            ? placeholderSuggestion
+            : `Explore curated learning steps and a practice project to raise your ${skillName} competency.`}
+        </div>
+      )}
+      <div style={{ marginTop: 8, fontSize: 12, color: colors.textMuted }}>
+        Tip: Recommendations are cached per skill and level to avoid duplicate requests.
+      </div>
     </div>
   );
 }

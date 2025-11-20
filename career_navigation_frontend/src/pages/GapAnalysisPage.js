@@ -98,7 +98,6 @@ export default function GapAnalysisPage() {
           <GapAnalysisView
             result={result}
             onRecommendClick={(skill) => {
-              // Placeholder for milestone 3: could call recommender service here
               // eslint-disable-next-line no-console
               console.info("Recommend clicked for skill:", skill);
             }}

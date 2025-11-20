@@ -6,6 +6,7 @@ import RoleSelectorPage from './pages/RoleSelectorPage';
 import GapAnalysisPage from './pages/GapAnalysisPage';
 import RoadmapPage from './pages/RoadmapPage';
 import ProgressPage from './pages/ProgressPage';
+import useRecommendations from './hooks/useRecommendations';
 
 /**
  * PUBLIC_INTERFACE
@@ -274,22 +275,71 @@ function PathsPage() {
 
 // PUBLIC_INTERFACE
 function RecommendationsPage() {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const run = async () => {
-    setLoading(true);
-    setData(null);
-    try {
-      const res = await postRecommend({ skillName: 'System Design', skillDescription: 'Scalable services', requiredLevel: 4 });
-      setData(res);
-    } finally {
-      setLoading(false);
-    }
+  // Simple standalone UI allowing user to type a skill (or choose) and level
+  const { data, loading, error, getForSkill } = useRecommendations();
+  const [skillName, setSkillName] = useState('System Design');
+  const [skillDescription, setSkillDescription] = useState('Architecting scalable and reliable services.');
+  const [level, setLevel] = useState(4);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await getForSkill({ skillName: skillName.trim(), skillDescription: skillDescription.trim(), level: Number(level) || 1 });
   };
+
   return (
     <section style={{ background: colors.surface, border: `1px solid ${colors.border}`, borderRadius: 12, boxShadow: colors.shadow, padding: 16 }}>
       <h2 style={{ marginTop: 0, color: colors.primary }}>Recommendations</h2>
-      <button style={styles.btnPrimary} onClick={run} disabled={loading}>{loading ? 'Requesting…' : 'Generate for "System Design"'}</button>
+      <p style={{ color: colors.textMuted, marginTop: -6 }}>
+        Enter a skill and target level to generate tailored steps, resources, and project ideas. Uses the recommender service with mock fallback when offline.
+      </p>
+
+      <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 10, marginTop: 8 }}>
+        <label style={{ display: 'grid', gap: 6 }}>
+          <span style={{ fontWeight: 600 }}>Skill</span>
+          <input
+            value={skillName}
+            onChange={(e) => setSkillName(e.target.value)}
+            placeholder="e.g., System Design"
+            style={{ padding: '10px 12px', borderRadius: 10, border: `1px solid ${colors.border}`, outline: 'none' }}
+            required
+          />
+        </label>
+        <label style={{ display: 'grid', gap: 6 }}>
+          <span style={{ fontWeight: 600 }}>Description</span>
+          <input
+            value={skillDescription}
+            onChange={(e) => setSkillDescription(e.target.value)}
+            placeholder="e.g., Architecting scalable and reliable services"
+            style={{ padding: '10px 12px', borderRadius: 10, border: `1px solid ${colors.border}`, outline: 'none' }}
+          />
+        </label>
+        <label style={{ display: 'grid', gap: 6, maxWidth: 220 }}>
+          <span style={{ fontWeight: 600 }}>Target Level (1–5)</span>
+          <input
+            type="number"
+            min={1}
+            max={5}
+            value={level}
+            onChange={(e) => setLevel(e.target.value)}
+            style={{ padding: '10px 12px', borderRadius: 10, border: `1px solid ${colors.border}`, outline: 'none' }}
+          />
+        </label>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <button type="submit" style={styles.btnPrimary} disabled={loading}>
+            {loading ? 'Requesting…' : `Generate for “${skillName || 'Skill'}”`}
+          </button>
+          <div style={{ alignSelf: 'center', color: colors.textMuted, fontSize: 13 }}>
+            Mock mode: {isMockMode() ? 'ON' : 'OFF'}
+          </div>
+        </div>
+      </form>
+
+      {error && (
+        <div role="alert" style={{ marginTop: 10, color: colors.error }}>
+          {error}
+        </div>
+      )}
+
       {data && (
         <div style={{ display: 'grid', gap: 8, marginTop: 12 }}>
           <div>
