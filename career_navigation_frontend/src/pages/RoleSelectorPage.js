@@ -28,7 +28,7 @@ export default function RoleSelectorPage() {
         <p style={{ color: "rgba(17,24,39,0.7)", marginTop: -8 }}>
           Choose your current and target roles to begin the gap analysis.
         </p>
-        <RoleSelector onProceed={() => navigate("/analysis")} />
+        <RoleSelector onProceed={() => navigate("/mind-map")} />
       </div>
 
       <div style={{ marginTop: 12, ...card }}>

@@ -1,10 +1,11 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Link, NavLink, Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom';
-import { getRoles, getRole, postGapAnalysis, postRecommend, postRoadmap, isMockMode } from './api';
+import { getRoles, getRole, postGapAnalysis, postRecommend, isMockMode } from './api';
 import { AppStateProvider, useAppState } from './context/AppStateContext';
 import RoleSelectorPage from './pages/RoleSelectorPage';
 import GapAnalysisPage from './pages/GapAnalysisPage';
 import RoadmapPage from './pages/RoadmapPage';
+import MindMapPage from './pages/MindMapPage';
 import ProgressPage from './pages/ProgressPage';
 import useRecommendations from './hooks/useRecommendations';
 
@@ -82,15 +83,16 @@ function keyActivate(handler) {
 
 // Sidebar items
 const NAV_ITEMS = [
-  { to: '/', label: 'Dashboard', icon: '🏠' },
-  { to: '/role-selector', label: 'Role Selector', icon: '🎯' },
-  { to: '/roles', label: 'Roles', icon: '📋' },
-  { to: '/analysis', label: 'Analysis', icon: '🧪' },
-  { to: '/gap-analysis', label: 'Gap Analysis', icon: '🧩' },
-  { to: '/paths', label: 'Paths', icon: '🧭' },
-  { to: '/roadmap', label: 'Roadmap', icon: '🗺️' },
-  { to: '/recommendations', label: 'Recommendations', icon: '💼' },
-  { to: '/progress', label: 'Progress', icon: '📈' },
+  { to: '/', label: 'Dashboard', icon: '\ud83c\udfe0' },
+  { to: '/role-selector', label: 'Role Selector', icon: '\ud83c\udfaf' },
+  { to: '/roles', label: 'Roles', icon: '\ud83d\udccb' },
+  { to: '/analysis', label: 'Analysis', icon: '\ud83e\uddea' },
+  { to: '/gap-analysis', label: 'Gap Analysis', icon: '\ud83e\udde9' },
+  { to: '/paths', label: 'Paths', icon: '\ud83e\udded' },
+  { to: '/roadmap', label: 'Roadmap', icon: '\ud83d\uddfa\ufe0f' },
+  { to: '/recommendations', label: 'Recommendations', icon: '\ud83d\udcbc' },
+  { to: '/progress', label: 'Progress', icon: '\ud83d\udcc8' },
+  { to: '/mind-map', label: 'Mind Map', icon: '\ud83e\udde0' },
 ];
 
 // Pages
@@ -515,6 +517,7 @@ function AppShell() {
             <Route path="/roadmap" element={<RoadmapPage />} />
             <Route path="/recommendations" element={<RecommendationsPage />} />
             <Route path="/progress" element={<ProgressPage />} />
+            <Route path="/mind-map" element={<MindMapPage />} />
           </Routes>
         </main>
       </div>

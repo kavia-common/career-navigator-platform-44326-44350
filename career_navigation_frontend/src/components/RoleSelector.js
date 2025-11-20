@@ -8,6 +8,7 @@ import { useAppState } from "../context/AppStateContext";
  * - onProceed?: function called when user clicks "Continue"
  * - compact?: boolean reduces padding/layout
  */
+import { useNavigate } from "react-router-dom";
 export default function RoleSelector({ onProceed, compact = false }) {
   const {
     roles,
@@ -57,6 +58,7 @@ export default function RoleSelector({ onProceed, compact = false }) {
     boxShadow: "0 3px 10px rgba(245,158,11,0.22)",
   };
 
+  const navigate = useNavigate();
   return (
     <div style={containerStyle}>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
@@ -125,7 +127,11 @@ export default function RoleSelector({ onProceed, compact = false }) {
           <button
             type="button"
             style={btn}
-            onClick={() => onProceed({ current: selectedCurrentRole, target: selectedTargetRole })}
+            onClick={() => {
+              const payload = { current: selectedCurrentRole, target: selectedTargetRole };
+              if (typeof onProceed === 'function') onProceed(payload);
+              else navigate('/mind-map');
+            }}
             disabled={!selectedCurrentRole || !selectedTargetRole}
           >
             Continue
