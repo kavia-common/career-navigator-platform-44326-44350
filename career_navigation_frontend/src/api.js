@@ -246,8 +246,78 @@ export async function getRole(id) {
   const base = getBackendUrl().replace(/\/*$/, "");
   const url = `${base}/roles/${encodeURIComponent(id)}`;
   if (isMockMode()) {
-    // Lightweight mock detail with empty required_skills
-    return { id, name: "Role (mock)", description: "Mock role detail", required_skills: [] };
+    // Rich mock detail with representative required_skills and nested sub_skills
+    const mockDetail = {
+      id,
+      name: "Senior Software Engineer (mock)",
+      description:
+        "Experienced engineer responsible for end-to-end feature delivery, code quality, and mentoring.",
+      required_skills: [
+        {
+          skill_id: 100,
+          skill_name: "Programming: JavaScript/TypeScript",
+          level_required: 3,
+          sub_skills: [
+            "ES2020+ features",
+            "TypeScript generics and utility types",
+            "Async patterns (Promises, async/await)",
+            "Linting and formatting workflows",
+          ],
+        },
+        {
+          skill_id: 101,
+          skill_name: "Frontend: React Ecosystem",
+          level_required: 3,
+          sub_skills: [
+            "React hooks and context",
+            "Performance optimizations (memo, suspense basics)",
+            "State management patterns",
+            "Accessibility (ARIA, keyboard nav)",
+          ],
+        },
+        {
+          skill_id: 102,
+          skill_name: "Backend: APIs",
+          level_required: 3,
+          sub_skills: [
+            "REST design and pagination",
+            "Authentication and authorization basics",
+            "Error handling and observability",
+          ],
+        },
+        {
+          skill_id: 103,
+          skill_name: "Architecture: System Design",
+          level_required: 4,
+          sub_skills: [
+            "Caching, rate limiting",
+            "Scalability and reliability patterns",
+            "Data modeling and trade-offs",
+          ],
+        },
+        {
+          skill_id: 104,
+          skill_name: "Cloud: AWS/GCP/Azure",
+          level_required: 3,
+          sub_skills: [
+            "IAM and networking fundamentals",
+            "Managed databases and storage",
+            "CI/CD pipelines",
+          ],
+        },
+        {
+          skill_id: 105,
+          skill_name: "Collaboration: Communication & Mentoring",
+          level_required: 3,
+          sub_skills: [
+            "Code reviews and feedback",
+            "Technical documentation",
+            "Pairing and mentoring juniors",
+          ],
+        },
+      ],
+    };
+    return mockDetail;
   }
   return requestJson(url, { method: "GET" });
 }

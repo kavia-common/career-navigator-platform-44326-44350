@@ -40,7 +40,8 @@ export default function RoleSelectorPage() {
         <strong>Summary</strong>
         <div style={{ color: colors.textMuted }}>
           Current: {selectedCurrentRole ? selectedCurrentRole.name : "—"} | Target:{" "}
-          {selectedTargetRole ? selectedTargetRole.name : "—"}
+          {selectedTargetRole ? selectedTargetRole.name : "—"} ·
+          {' '}Select a role to preview its skills below.
         </div>
       </div>
 

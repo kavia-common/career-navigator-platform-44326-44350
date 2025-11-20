@@ -164,7 +164,10 @@ export default function SkillsTree({ roleId, title = "Skills & Requirements" }) 
         </div>
       )}
       {!loading && !error && (!roleDetail || !Array.isArray(roleDetail.required_skills) || roleDetail.required_skills.length === 0) && (
-        <div style={{ color: colors.textMuted }}>No skills to display for this role.</div>
+        <div style={{ color: colors.textMuted }}>
+          No skills to display for this role yet. If you are offline or the backend lacks detailed data,
+          the app will use a representative mock once a role is selected.
+        </div>
       )}
 
       {Object.keys(grouped).map((group) => {
