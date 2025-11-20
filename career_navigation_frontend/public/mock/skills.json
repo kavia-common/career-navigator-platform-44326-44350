@@ -1,7 +1,37 @@
 [
   { "id": 101, "name": "Python", "description": "Python programming proficiency" },
   { "id": 102, "name": "APIs", "description": "RESTful and GraphQL API design" },
-  { "id": 201, "name": "System Design", "description": "Architecting scalable systems" },
-  { "id": 202, "name": "Cloud (AWS/GCP/Azure)", "description": "Foundational cloud services" },
-  { "id": 301, "name": "Leadership", "description": "Leading teams and initiatives" }
+  { "id": 103, "name": "JavaScript", "description": "Modern JavaScript (ES6+) fundamentals and patterns" },
+  { "id": 104, "name": "TypeScript", "description": "Type-safe JavaScript for scalable apps" },
+
+  { "id": 201, "name": "System Design", "description": "Architecting scalable, reliable systems" },
+  { "id": 202, "name": "Cloud (AWS/GCP/Azure)", "description": "Core cloud services, IAM, networking, storage, compute" },
+  { "id": 203, "name": "Databases", "description": "Relational and NoSQL design and operations" },
+  { "id": 204, "name": "CI/CD", "description": "Continuous integration and delivery practices" },
+
+  { "id": 301, "name": "Leadership", "description": "Leading teams, setting direction, coaching" },
+  { "id": 302, "name": "Communication", "description": "Clear written and verbal communication" },
+  { "id": 303, "name": "Stakeholder Management", "description": "Expectation management and alignment" },
+
+  { "id": 401, "name": "Data Analysis", "description": "Exploratory analysis, dashboards, and reporting" },
+  { "id": 402, "name": "Machine Learning", "description": "Modeling, evaluation, and deployment basics" },
+  { "id": 403, "name": "MLOps", "description": "Pipelines, model serving, monitoring" },
+
+  { "id": 501, "name": "Security Fundamentals", "description": "Threats, controls, and secure SDLC" },
+  { "id": 502, "name": "AppSec", "description": "Application security practices and tooling" },
+  { "id": 503, "name": "Security Architecture", "description": "Security design and governance" },
+
+  { "id": 601, "name": "Infrastructure as Code", "description": "Terraform/CloudFormation basics" },
+  { "id": 602, "name": "Observability", "description": "Logging, metrics, tracing" },
+  { "id": 603, "name": "SRE Practices", "description": "SLOs, error budgets, incident response" },
+
+  { "id": 701, "name": "Testing", "description": "Unit, integration, E2E testing" },
+  { "id": 702, "name": "Test Automation", "description": "Frameworks and pipelines for automated tests" },
+
+  { "id": 801, "name": "Architecture", "description": "Solution and enterprise architecture practices" },
+  { "id": 802, "name": "Solution Design", "description": "Designing solutions to meet business constraints" },
+
+  { "id": 901, "name": "Product Discovery", "description": "User research, problem framing, hypothesis testing" },
+  { "id": 902, "name": "Roadmapping", "description": "Prioritization and sequencing of initiatives" },
+  { "id": 903, "name": "Program Delivery", "description": "Cross-team planning and execution" }
 ]
