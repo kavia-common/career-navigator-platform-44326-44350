@@ -27,6 +27,41 @@ Launches the test runner in interactive watch mode.
 Builds the app for production to the `build` folder.\
 It correctly bundles React in production mode and optimizes the build for the best performance.
 
+## Runtime Configuration and Env Vars
+
+The frontend reads the following environment variables (Create React App requires the `REACT_APP_` prefix):
+
+- REACT_APP_API_BASE (optional)
+- REACT_APP_BACKEND_URL (optional)
+  - The Backend API base URL. The app picks the first non-empty of `REACT_APP_API_BASE`, `REACT_APP_BACKEND_URL`, otherwise defaults to `window.location.origin`.
+- REACT_APP_RECOMMENDER_URL (optional)
+  - LLM Recommendation service base URL (defaults to `http://localhost:8081`).
+- REACT_APP_WS_URL (optional)
+  - WebSocket base URL if used.
+
+At startup, the app logs the resolved endpoints to the browser console:
+- resolvedApiBase
+- resolvedRecommenderBase
+- resolvedWsBase
+- plus the raw env values for quick diagnostics.
+
+### Mock Mode
+
+If the backend is unreachable (network/CORS) or the resolved API base is empty, the app automatically switches to mock mode:
+
+- Fetch Roles returns a small list of sample roles.
+- Sample Gap Analysis returns strengths, gaps, and recommendations.
+- Sample Recommend returns 3 steps, 3 resources, and 2 projects.
+
+A visible notice appears in the Connectivity panel:
+“Running with mock data (backend unreachable). Configure REACT_APP_BACKEND_URL to enable live data.”
+
+To enable live data, set:
+- `REACT_APP_BACKEND_URL=http://localhost:8000` (or your URL)
+- (Optional) `REACT_APP_API_BASE=...` to override
+
+If you hit CORS errors, ensure the backend allows `http://localhost:3000` in its allowed origins.
+
 ## Customization
 
 ### Colors

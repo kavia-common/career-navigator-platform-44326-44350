@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { getRoles, postGapAnalysis, postRecommend } from './api';
+import { getRoles, postGapAnalysis, postRecommend, isMockMode } from './api';
 
 /**
  * Ocean Professional themed landing page for the Career Navigation Platform.
@@ -585,7 +585,7 @@ function App() {
                     fontSize: 14,
                   }}
                 >
-                  {connError}
+                  {connError}. Tips: ensure backend is running on http://localhost:8000 or set REACT_APP_BACKEND_URL/REACT_APP_API_BASE. If you see CORS errors, allow http://localhost:3000 in backend CORS config or run via docker compose.
                 </div>
               )}
             </div>
