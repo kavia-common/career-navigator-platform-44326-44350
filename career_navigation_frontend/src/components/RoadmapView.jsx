@@ -40,7 +40,9 @@ export default function RoadmapView({ roleId, title = 'Role Roadmap' }) {
         }
       } catch (e) {
         if (!ignore) {
-          setError(e?.uiMessage || e?.message || 'Unable to load role details.');
+          // Use a mock fallback even if fetch fails
+          setRoleDetail(buildMockRoleDetail('Target Role (fallback)'));
+          setError(e?.uiMessage || e?.message || 'Unable to load role details; using fallback.');
         }
       } finally {
         if (!ignore) setLoading(false);

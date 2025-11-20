@@ -1,26 +1,24 @@
 import { getBackendUrl, getRecommenderUrl, getApiBase } from "./config";
 
 /**
- * REST client with diagnostics. Mock mode is disabled by default and only enabled
- * when REACT_APP_MOCK_MODE === 'true'.
+ * REST client with diagnostics and graceful mock fallbacks.
  *
- * - All API calls use REACT_APP_API_BASE || REACT_APP_BACKEND_URL.
- * - Network/HTTP failures are surfaced to the UI (no silent mock fallback),
- *   except when explicit mock mode is enabled.
- * - Minimal console.info indicates which base URL is active.
+ * Features:
+ * - Detailed console.error logs on failures (status, body, CORS hints, URL).
+ * - Auto "mock mode" when API base is empty or network fails:
+ *   - getRoles(): returns realistic role list
+ *   - postGapAnalysis(): returns strengths/gaps/recommendations structure
+ *   - postRecommend(): returns steps/resources/projects arrays
+ * - Friendly error objects for UI with guidance.
  */
 
-// Determine explicit mock mode from env
-const EXPLICIT_MOCK =
-  (typeof process !== "undefined" &&
-    process.env &&
-    process.env.REACT_APP_MOCK_MODE === "true") ||
-  false;
+// In-memory flag toggled when we detect backend unreachable
+let mockMode = false;
 
 // PUBLIC_INTERFACE
 export function isMockMode() {
-  /** Whether the client should serve mock responses. Controlled via REACT_APP_MOCK_MODE==='true'. */
-  return EXPLICIT_MOCK === true;
+  /** Whether the client is serving mock responses due to connectivity issues. */
+  return mockMode || !getApiBase();
 }
 
 // Shape a user-friendly error with diagnostics logged to console
@@ -74,9 +72,10 @@ async function requestJson(url, options = {}) {
       hint:
         "If this is a CORS error, ensure backend allows http://localhost:3000 or use a dev proxy.",
     });
-    // Do not auto-enable mock mode; surface error unless explicit mock is enabled
+    // Switch to mock mode on fetch failure
+    mockMode = true;
     throw userFacingError(
-      "Unable to reach backend service.",
+      "Unable to reach backend service. Using mock data when possible.",
       { url, originalError: e }
     );
   }
@@ -224,14 +223,21 @@ const mocks = {
 
 // PUBLIC_INTERFACE
 export async function getRoles() {
-  /** Fetch the list of roles from the backend; use mock only if REACT_APP_MOCK_MODE==='true'. */
+  /** Fetch the list of roles from the backend or mock when unreachable. */
   const base = getBackendUrl().replace(/\/*$/, "");
   const url = `${base}/roles`;
 
+  // Serve mock if mockMode or api base is empty
   if (isMockMode()) {
     return Promise.resolve(mocks.roles);
   }
-  return await requestJson(url, { method: "GET" });
+
+  try {
+    return await requestJson(url, { method: "GET" });
+  } catch (_e) {
+    // Fall back to mock data
+    return mocks.roles;
+  }
 }
 
 // PUBLIC_INTERFACE
@@ -240,14 +246,78 @@ export async function getRole(id) {
   const base = getBackendUrl().replace(/\/*$/, "");
   const url = `${base}/roles/${encodeURIComponent(id)}`;
   if (isMockMode()) {
-    // Minimal mock when explicit mock mode is on
-    return {
+    // Rich mock detail with representative required_skills and nested sub_skills
+    const mockDetail = {
       id,
       name: "Senior Software Engineer (mock)",
       description:
         "Experienced engineer responsible for end-to-end feature delivery, code quality, and mentoring.",
-      required_skills: [],
+      required_skills: [
+        {
+          skill_id: 100,
+          skill_name: "Programming: JavaScript/TypeScript",
+          level_required: 3,
+          sub_skills: [
+            "ES2020+ features",
+            "TypeScript generics and utility types",
+            "Async patterns (Promises, async/await)",
+            "Linting and formatting workflows",
+          ],
+        },
+        {
+          skill_id: 101,
+          skill_name: "Frontend: React Ecosystem",
+          level_required: 3,
+          sub_skills: [
+            "React hooks and context",
+            "Performance optimizations (memo, suspense basics)",
+            "State management patterns",
+            "Accessibility (ARIA, keyboard nav)",
+          ],
+        },
+        {
+          skill_id: 102,
+          skill_name: "Backend: APIs",
+          level_required: 3,
+          sub_skills: [
+            "REST design and pagination",
+            "Authentication and authorization basics",
+            "Error handling and observability",
+          ],
+        },
+        {
+          skill_id: 103,
+          skill_name: "Architecture: System Design",
+          level_required: 4,
+          sub_skills: [
+            "Caching, rate limiting",
+            "Scalability and reliability patterns",
+            "Data modeling and trade-offs",
+          ],
+        },
+        {
+          skill_id: 104,
+          skill_name: "Cloud: AWS/GCP/Azure",
+          level_required: 3,
+          sub_skills: [
+            "IAM and networking fundamentals",
+            "Managed databases and storage",
+            "CI/CD pipelines",
+          ],
+        },
+        {
+          skill_id: 105,
+          skill_name: "Collaboration: Communication & Mentoring",
+          level_required: 3,
+          sub_skills: [
+            "Code reviews and feedback",
+            "Technical documentation",
+            "Pairing and mentoring juniors",
+          ],
+        },
+      ],
     };
+    return mockDetail;
   }
   return requestJson(url, { method: "GET" });
 }
@@ -265,7 +335,11 @@ export async function postGapAnalysis(payload) {
     return Promise.resolve(mocks.gapAnalysis);
   }
 
-  return await requestJson(url, { method: "POST", body: JSON.stringify(payload) });
+  try {
+    return await requestJson(url, { method: "POST", body: JSON.stringify(payload) });
+  } catch (_e) {
+    return mocks.gapAnalysis;
+  }
 }
 
 // PUBLIC_INTERFACE
@@ -277,7 +351,7 @@ export async function postRoadmap(payload) {
   const base = getBackendUrl().replace(/\/*$/, "");
   const url = `${base}/roadmap`;
   if (isMockMode()) {
-    // Simple static mind-map using provided gaps in mock mode
+    // Simple static mind-map using provided gaps
     const nodes = [
       { data: { id: "current", label: "Current" } },
       { data: { id: "target", label: "Target" } },
@@ -319,7 +393,11 @@ export async function postRecommend(payload) {
     return Promise.resolve(mocks.recommend);
   }
 
-  return await requestJson(url, { method: "POST", body: JSON.stringify(payload) });
+  try {
+    return await requestJson(url, { method: "POST", body: JSON.stringify(payload) });
+  } catch (_e) {
+    return mocks.recommend;
+  }
 }
 
 const api = {
@@ -331,12 +409,5 @@ const api = {
   postRecommend,
   isMockMode,
 };
-
-// eslint-disable-next-line no-console
-console.info("[API] Active base URLs", {
-  backend: getBackendUrl(),
-  recommender: getRecommenderUrl(),
-  mockMode: isMockMode(),
-});
 
 export default api;

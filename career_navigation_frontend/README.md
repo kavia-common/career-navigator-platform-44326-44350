@@ -47,14 +47,14 @@ At startup, the app logs the resolved endpoints to the browser console:
 
 ### Mock Mode
 
-Mock mode is disabled by default. To enable mock data explicitly for local UI work, set:
-- `REACT_APP_MOCK_MODE=true`
+If the backend is unreachable (network/CORS) or the resolved API base is empty, the app automatically switches to mock mode:
 
-When enabled, certain endpoints return deterministic mock payloads. When disabled, the app always calls the backend and surfaces errors in the UI.
+- Fetch Roles returns a small list of sample roles.
+- Sample Gap Analysis returns strengths, gaps, and recommendations.
+- Sample Recommend returns 3 steps, 3 resources, and 2 projects.
 
-At startup, the console logs the active base URLs:
-- `[API] Active base URLs { backend, recommender, mockMode }`
-- `[RuntimeConfig] Resolved API endpoints: { ... }`
+A visible notice appears in the Connectivity panel:
+“Running with mock data (backend unreachable). Configure REACT_APP_BACKEND_URL to enable live data.”
 
 To enable live data, set:
 - `REACT_APP_BACKEND_URL=http://localhost:8000` (or your URL)
