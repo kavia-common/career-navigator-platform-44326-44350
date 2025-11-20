@@ -16,6 +16,8 @@ RUN pip install --no-cache-dir fastapi==0.115.5 uvicorn[standard]==0.32.0 sqlalc
 
 COPY src /app/src
 
+# The application will read DATABASE_URL if provided; otherwise, it will construct
+# a Postgres URL from POSTGRES_HOST/PORT/DB/USER/PASSWORD.
 EXPOSE 8000
 
 CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -1,8 +1,15 @@
+"""SQLAlchemy ORM models for the Career Navigator backend.
+
+Defines:
+- Role: Job roles within the career framework
+- Skill: Skills that can be mapped to roles
+- RoleSkill: Many-to-many mapping between Role and Skill with required proficiency level
+- UserProgress: Tracks a user's proficiency level for a given skill
+"""
 from datetime import datetime
 from typing import List, Optional
 
 from sqlalchemy import (
-    Column,
     Integer,
     String,
     Text,
@@ -16,6 +23,7 @@ Base = declarative_base()
 
 
 class TimestampMixin:
+    """Shared created_at/updated_at timestamp fields."""
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=False), default=datetime.utcnow
     )
@@ -25,6 +33,7 @@ class TimestampMixin:
 
 
 class Role(Base, TimestampMixin):
+    """Represents a job role with a set of required skills and levels."""
     __tablename__ = "roles"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
@@ -42,6 +51,7 @@ class Role(Base, TimestampMixin):
 
 
 class Skill(Base, TimestampMixin):
+    """Represents a skill that can be associated with one or more roles."""
     __tablename__ = "skills"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
@@ -59,6 +69,7 @@ class Skill(Base, TimestampMixin):
 
 
 class RoleSkill(Base, TimestampMixin):
+    """Associative table between Role and Skill with required proficiency."""
     __tablename__ = "role_skills"
     __table_args__ = (
         UniqueConstraint("role_id", "skill_id", name="uq_role_skill"),
@@ -79,6 +90,7 @@ class RoleSkill(Base, TimestampMixin):
 
 
 class UserProgress(Base, TimestampMixin):
+    """Tracks a user's current level for a particular skill."""
     __tablename__ = "user_progress"
     __table_args__ = (
         UniqueConstraint("user_id", "skill_id", name="uq_user_skill"),

@@ -16,8 +16,13 @@ def get_database_url() -> str:
     - POSTGRES_USER
     - POSTGRES_PASSWORD
 
-    PUBLIC_INTERFACE
+    If DATABASE_URL is set, that will be used directly. Otherwise, a URL is constructed.
     """
+    # Prefer a full DATABASE_URL if provided (e.g. for cloud providers)
+    configured = os.getenv("DATABASE_URL")
+    if configured:
+        return configured
+
     host = os.getenv("POSTGRES_HOST", "localhost")
     port = os.getenv("POSTGRES_PORT", "5432")
     db = os.getenv("POSTGRES_DB", "career_navigator")
@@ -26,7 +31,7 @@ def get_database_url() -> str:
     return f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{db}"
 
 
-DATABASE_URL = os.getenv("DATABASE_URL", get_database_url())
+DATABASE_URL = get_database_url()
 
 # Create the SQLAlchemy engine
 # NullPool avoids connection reuse issues in some serverless/dev environments
@@ -38,7 +43,11 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine, futu
 
 # PUBLIC_INTERFACE
 def get_db() -> Generator[Session, None, None]:
-    """FastAPI dependency to provide a SQLAlchemy Session per-request."""
+    """FastAPI dependency to provide a SQLAlchemy Session per-request.
+
+    Yields:
+        sqlalchemy.orm.Session: Database session for the current request context.
+    """
     db: Optional[Session] = None
     try:
         db = SessionLocal()

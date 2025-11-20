@@ -1,6 +1,6 @@
 name: backend-api
 type: backend
-description: FastAPI backend for Career Navigator
+description: FastAPI backend for Career Navigator (roles, skills, gap analysis, roadmap, progress).
 build:
   dockerfile: Dockerfile
 run:
@@ -16,3 +16,5 @@ run:
       required: true
     - name: POSTGRES_PASSWORD
       required: true
+    - name: DATABASE_URL
+      required: false

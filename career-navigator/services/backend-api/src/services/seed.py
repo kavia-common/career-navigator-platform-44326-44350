@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple
+from typing import Dict
 
 from sqlalchemy.orm import Session
 
@@ -199,10 +199,10 @@ def _get_role_seed_data() -> Dict[str, Dict[str, int]]:
 def seed_roles_and_skills(db: Session) -> None:
     """Seed the database with roles, skills, and role-skill mappings.
 
-    - Creates Skills if they do not exist
-    - Creates Roles if they do not exist
-    - Creates RoleSkill mappings with level_required
-    This is idempotent; re-running will not duplicate entries.
+    Behavior and guarantees:
+    - Idempotent: running multiple times does not create duplicates.
+    - Ensures at least 15 roles exist with 10–20 skills each (per specs).
+    - Creates Skill, Role, and RoleSkill rows as needed.
     """
     seed_data = _get_role_seed_data()
 
@@ -217,8 +217,7 @@ def seed_roles_and_skills(db: Session) -> None:
     }
     for name in all_skill_names:
         if name not in existing_skills:
-            skill = Skill(name=name, description=f"{name} competency")
-            db.add(skill)
+            db.add(Skill(name=name, description=f"{name} competency")))
     db.commit()
     # Refresh skill cache
     existing_skills = {s.name: s for s in db.query(Skill).filter(Skill.name.in_(list(all_skill_names))).all()}
@@ -241,7 +240,6 @@ def seed_roles_and_skills(db: Session) -> None:
                 .first()
             )
             if not existing_mapping:
-                mapping = RoleSkill(role_id=role.id, skill_id=skill.id, level_required=level_req)
-                db.add(mapping)
+                db.add(RoleSkill(role_id=role.id, skill_id=skill.id, level_required=max(1, min(5, level_req))))
 
         db.commit()

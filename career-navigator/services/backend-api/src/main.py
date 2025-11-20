@@ -21,7 +21,12 @@ app = FastAPI(
 
 @app.on_event("startup")
 def on_startup() -> None:
-    """Create database tables and seed data on service startup."""
+    """Create database tables and seed data on service startup.
+
+    This will:
+    - Create all tables defined by SQLAlchemy models.
+    - Run idempotent seeding for roles and skills (15 roles with 10–20 skills each).
+    """
     # Create all tables
     Base.metadata.create_all(bind=engine)
     # Seed data
@@ -36,13 +41,24 @@ def on_startup() -> None:
 # PUBLIC_INTERFACE
 @app.get("/health", tags=["health"], summary="Service health check")
 def health() -> dict:
-    """Simple liveness endpoint."""
+    """Simple liveness endpoint.
+
+    Returns:
+        dict: {"status": "ok"} if the service is up.
+    """
     return {"status": "ok"}
 
 
 # PUBLIC_INTERFACE
 @app.get("/roles", tags=["roles"], summary="List all roles")
 def list_roles(db: Session = Depends(get_db)) -> List[dict]:
-    """Return all roles with id and name."""
+    """Return all roles with id, name, and description.
+
+    Args:
+        db (Session): Injected SQLAlchemy session.
+
+    Returns:
+        List[dict]: Array of role objects.
+    """
     roles = db.query(Role).order_by(Role.name.asc()).all()
     return [{"id": r.id, "name": r.name, "description": r.description} for r in roles]
