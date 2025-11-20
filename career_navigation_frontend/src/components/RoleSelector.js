@@ -76,11 +76,20 @@ export default function RoleSelector({ onProceed, compact = false }) {
             <option value="" disabled>
               {loadingRoles ? "Loading…" : "Select current role"}
             </option>
-            {roles.map((r) => (
-              <option key={r.id} value={r.id}>
-                {r.name}
-              </option>
-            ))}
+            {[...roles]
+              .sort((a, b) => {
+                const ta = (a.track || '').localeCompare(b.track || '');
+                if (ta !== 0) return ta;
+                const sa = Number.isFinite(a.seq) ? a.seq : 9999;
+                const sb = Number.isFinite(b.seq) ? b.seq : 9999;
+                if (sa !== sb) return sa - sb;
+                return String(a.name).localeCompare(String(b.name));
+              })
+              .map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.track ? `[${r.track}] ` : ''}{r.name}
+                </option>
+              ))}
           </select>
         </div>
         <div>
