@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { getRoles, postGapAnalysis, postRecommend } from './api';
 
 /**
  * Ocean Professional themed landing page for the Career Navigation Platform.
@@ -352,6 +353,100 @@ function App() {
   const goToProgress = () => handleSelect('Progress');
 
   // Render placeholder content for the selected section and search notice
+  // Connectivity panel state
+  const [rolesCount, setRolesCount] = useState(null);
+  const [rolesLoading, setRolesLoading] = useState(false);
+  const [gaResult, setGaResult] = useState(null);
+  const [gaLoading, setGaLoading] = useState(false);
+  const [recResult, setRecResult] = useState(null);
+  const [recLoading, setRecLoading] = useState(false);
+  const [connError, setConnError] = useState(null);
+
+  const panelBoxStyle = {
+    background: colors.surface,
+    border: `1px solid ${colors.border}`,
+    borderRadius: 12,
+    boxShadow: colors.shadow,
+    padding: 16,
+  };
+
+  const smallBtn = {
+    background: colors.primary,
+    color: '#fff',
+    padding: '8px 12px',
+    borderRadius: 10,
+    border: 'none',
+    fontWeight: 600,
+    fontSize: 13,
+    cursor: 'pointer',
+    boxShadow: '0 3px 10px rgba(30,58,138,0.18)',
+  };
+
+  const smallBtnAlt = {
+    ...smallBtn,
+    background: colors.secondary,
+    color: '#111827',
+    boxShadow: '0 3px 10px rgba(245,158,11,0.22)',
+  };
+
+  // Handlers for connectivity actions
+  const handleFetchRoles = async () => {
+    setConnError(null);
+    setRolesLoading(true);
+    setRolesCount(null);
+    try {
+      const data = await getRoles();
+      setRolesCount(Array.isArray(data) ? data.length : 0);
+    } catch (e) {
+      setConnError(e.message || String(e));
+    } finally {
+      setRolesLoading(false);
+    }
+  };
+
+  const handleSampleGapAnalysis = async () => {
+    setConnError(null);
+    setGaLoading(true);
+    setGaResult(null);
+    try {
+      // Use a simple sample: current=1, target=2 (IDs will exist after seed)
+      const data = await postGapAnalysis({ currentRoleId: 1, targetRoleId: 2 });
+      setGaResult({
+        strengths: data?.strengths?.length ?? 0,
+        gaps: data?.gaps?.length ?? 0,
+        recommendations: data?.recommendations?.slice(0, 2) ?? [],
+      });
+    } catch (e) {
+      setConnError(e.message || String(e));
+    } finally {
+      setGaLoading(false);
+    }
+  };
+
+  const handleSampleRecommend = async () => {
+    setConnError(null);
+    setRecLoading(true);
+    setRecResult(null);
+    try {
+      const data = await postRecommend({
+        skillName: 'System Design',
+        skillDescription: 'Architecting scalable and reliable web services.',
+        requiredLevel: 4,
+      });
+      // Show just counts and a peek
+      setRecResult({
+        stepsCount: data?.steps?.length ?? 0,
+        resourcesCount: data?.resources?.length ?? 0,
+        projectsCount: data?.projects?.length ?? 0,
+        sampleStep: data?.steps?.[0] ?? '',
+      });
+    } catch (e) {
+      setConnError(e.message || String(e));
+    } finally {
+      setRecLoading(false);
+    }
+  };
+
   const renderMainContent = () => {
     const searchNotice =
       searching && searchSubmitted ? (
@@ -395,6 +490,107 @@ function App() {
       return (
         <>
           {searchNotice}
+
+          {/* Connectivity Panel */}
+          <section aria-label="Connectivity" style={panelBoxStyle}>
+            <h2 style={{ margin: '0 0 8px', fontSize: 18, color: colors.primary }}>
+              Connectivity
+            </h2>
+            <p style={{ margin: '0 0 12px', color: colors.textMuted, fontSize: 14 }}>
+              Quick checks to verify backend and recommender services are reachable.
+            </p>
+
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              <button type="button" style={smallBtn} onClick={handleFetchRoles} disabled={rolesLoading}>
+                {rolesLoading ? 'Fetching roles…' : 'Fetch Roles'}
+              </button>
+              <button type="button" style={smallBtnAlt} onClick={handleSampleGapAnalysis} disabled={gaLoading}>
+                {gaLoading ? 'Running gap-analysis…' : 'Sample Gap Analysis'}
+              </button>
+              <button type="button" style={smallBtn} onClick={handleSampleRecommend} disabled={recLoading}>
+                {recLoading ? 'Requesting recommendations…' : 'Sample Recommend'}
+              </button>
+            </div>
+
+            <div style={{ marginTop: 12, display: 'grid', gap: 8 }}>
+              {rolesCount !== null && (
+                <div
+                  style={{
+                    background: '#fff',
+                    border: `1px solid ${colors.border}`,
+                    borderRadius: 10,
+                    padding: '10px 12px',
+                    fontSize: 14,
+                  }}
+                >
+                  Roles count: <strong>{rolesCount}</strong>
+                </div>
+              )}
+
+              {gaResult && (
+                <div
+                  style={{
+                    background: '#fff',
+                    border: `1px solid ${colors.border}`,
+                    borderRadius: 10,
+                    padding: '10px 12px',
+                    fontSize: 14,
+                  }}
+                >
+                  Gap analysis — strengths: <strong>{gaResult.strengths}</strong>, gaps:{" "}
+                  <strong>{gaResult.gaps}</strong>
+                  {gaResult.recommendations?.length ? (
+                    <div style={{ marginTop: 6, color: colors.textMuted }}>
+                      Sample recommendations:
+                      <ul style={{ margin: '6px 0 0 18px' }}>
+                        {gaResult.recommendations.map((r, idx) => (
+                          <li key={idx}>{r.suggestion || JSON.stringify(r)}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                </div>
+              )}
+
+              {recResult && (
+                <div
+                  style={{
+                    background: '#fff',
+                    border: `1px solid ${colors.border}`,
+                    borderRadius: 10,
+                    padding: '10px 12px',
+                    fontSize: 14,
+                  }}
+                >
+                  Recommendations — steps: <strong>{recResult.stepsCount}</strong>, resources:{" "}
+                  <strong>{recResult.resourcesCount}</strong>, projects:{" "}
+                  <strong>{recResult.projectsCount}</strong>
+                  {recResult.sampleStep ? (
+                    <div style={{ marginTop: 6, color: colors.textMuted }}>
+                      Sample step: “{recResult.sampleStep}”
+                    </div>
+                  ) : null}
+                </div>
+              )}
+
+              {connError && (
+                <div
+                  role="alert"
+                  style={{
+                    background: 'rgba(220,38,38,0.06)',
+                    border: '1px solid rgba(220,38,38,0.25)',
+                    color: colors.error,
+                    borderRadius: 10,
+                    padding: '10px 12px',
+                    fontSize: 14,
+                  }}
+                >
+                  {connError}
+                </div>
+              )}
+            </div>
+          </section>
+
           {sectionContent}
         </>
       );
