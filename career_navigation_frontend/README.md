@@ -115,3 +115,10 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+## Milestone 2 Additions
+
+- New route: `/gap-analysis` — Combined page to select roles and view strengths/gaps with inline expandable recommendation placeholders. This uses the existing API client (api.js) which gracefully falls back to mock data when the backend is unreachable.
+- New components:
+  - `src/components/GapAnalysisView.js` — renders strengths and gaps in two columns and expandable per-gap recommendation placeholders.
+  - `src/pages/GapAnalysisPage.js` — composes `RoleSelector` with `GapAnalysisView` and integrates the `postGapAnalysis` API call.

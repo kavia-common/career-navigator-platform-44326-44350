@@ -3,6 +3,7 @@ import { Link, NavLink, Routes, Route, useNavigate, useLocation, useParams } fro
 import { getRoles, getRole, postGapAnalysis, postRecommend, postRoadmap, postProgressUpdate, isMockMode } from './api';
 import { AppStateProvider, useAppState } from './context/AppStateContext';
 import RoleSelectorPage from './pages/RoleSelectorPage';
+import GapAnalysisPage from './pages/GapAnalysisPage';
 
 /**
  * PUBLIC_INTERFACE
@@ -82,6 +83,7 @@ const NAV_ITEMS = [
   { to: '/role-selector', label: 'Role Selector', icon: '🎯' },
   { to: '/roles', label: 'Roles', icon: '📋' },
   { to: '/analysis', label: 'Analysis', icon: '🧪' },
+  { to: '/gap-analysis', label: 'Gap Analysis', icon: '🧩' },
   { to: '/paths', label: 'Paths', icon: '🧭' },
   { to: '/recommendations', label: 'Recommendations', icon: '💼' },
   { to: '/progress', label: 'Progress', icon: '📈' },
@@ -477,6 +479,7 @@ function AppShell() {
             <Route path="/roles" element={<RolesList />} />
             <Route path="/roles/:id" element={<RoleDetail />} />
             <Route path="/analysis" element={<AnalysisPage />} />
+            <Route path="/gap-analysis" element={<GapAnalysisPage />} />
             <Route path="/paths" element={<PathsPage />} />
             <Route path="/recommendations" element={<RecommendationsPage />} />
             <Route path="/progress" element={<ProgressPage />} />
