@@ -62,6 +62,11 @@ Additional frontend variables present in the container environment (for complete
 - LLM Recommendation: http://localhost:8081
   - Health: GET /health → http://localhost:8081/health (returns {"status":"ok"})
 
+All URLs/ports above match the default mappings in career-navigator/infra/docker-compose.yaml:
+- backend-api → "8000:8000"
+- llm-recommendation → "8081:8081"
+- frontend-dev → "3000:3000"
+
 ## Verification Steps
 After docker compose up --build:
 
@@ -94,10 +99,13 @@ After docker compose up --build:
 
 ## Troubleshooting
 - Ports already in use:
-  - Change host port mappings in career-navigator/infra/docker-compose.yaml or stop the process using those ports.
-- Frontend cannot fetch roles/recommendations:
-  - Ensure backend (8000) and recommender (8081) are healthy (see health checks).
-  - Confirm the environment variables REACT_APP_BACKEND_URL and REACT_APP_RECOMMENDER_URL are correct.
+  - Symptom: docker compose reports port binding failures or the browser shows a different app on 3000/8000/8081.
+  - Fix: Stop the conflicting processes or change the host ports in career-navigator/infra/docker-compose.yaml, then re-run:
+    cd career-navigator/infra && docker compose up --build
+- Missing or incorrect environment variables:
+  - Symptom: Frontend cannot fetch roles or recommendations, or backend cannot connect to Postgres.
+  - Fix (frontend): Ensure REACT_APP_BACKEND_URL=http://localhost:8000 and REACT_APP_RECOMMENDER_URL=http://localhost:8081 (as provided by docker-compose).
+  - Fix (backend DB): Defaults are provided in compose (POSTGRES_*); if overriding, ensure DATABASE_URL or POSTGRES_* are set consistently.
 - OpenAI-backed recommendations not returning:
   - Export OPENAI_API_KEY in your shell prior to docker compose up, or set it in the compose service environment, then rebuild/restart:
     export OPENAI_API_KEY=sk-...
