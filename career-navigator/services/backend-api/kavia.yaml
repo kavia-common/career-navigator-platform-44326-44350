@@ -1,0 +1,18 @@
+name: backend-api
+type: backend
+description: FastAPI backend for Career Navigator
+build:
+  dockerfile: Dockerfile
+run:
+  command: uvicorn src.main:app --host 0.0.0.0 --port 8000
+  env:
+    - name: POSTGRES_HOST
+      required: true
+    - name: POSTGRES_PORT
+      required: true
+    - name: POSTGRES_DB
+      required: true
+    - name: POSTGRES_USER
+      required: true
+    - name: POSTGRES_PASSWORD
+      required: true

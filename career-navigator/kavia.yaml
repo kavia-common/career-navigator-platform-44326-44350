@@ -1,0 +1,14 @@
+name: career-navigator
+description: AI Career Navigation Platform MVP
+
+services:
+  - path: services/backend-api
+    type: backend
+  - path: services/llm-recommendation
+    type: microservice
+  - path: services/frontend-web
+    type: frontend
+
+infrastructure:
+  - path: infra/docker-compose.yaml
+  - path: infra/k8s
