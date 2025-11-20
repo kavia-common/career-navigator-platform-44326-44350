@@ -1,10 +1,11 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Link, NavLink, Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom';
-import { getRoles, getRole, postGapAnalysis, postRecommend, postRoadmap, postProgressUpdate, isMockMode } from './api';
+import { getRoles, getRole, postGapAnalysis, postRecommend, postRoadmap, isMockMode } from './api';
 import { AppStateProvider, useAppState } from './context/AppStateContext';
 import RoleSelectorPage from './pages/RoleSelectorPage';
 import GapAnalysisPage from './pages/GapAnalysisPage';
 import RoadmapPage from './pages/RoadmapPage';
+import ProgressPage from './pages/ProgressPage';
 
 /**
  * PUBLIC_INTERFACE
@@ -309,29 +310,7 @@ function RecommendationsPage() {
   );
 }
 
-// PUBLIC_INTERFACE
-function ProgressPage() {
-  const [userId, setUserId] = useState('anonymous');
-  const [skillId, setSkillId] = useState(101);
-  const [level, setLevel] = useState(1);
-  const [msg, setMsg] = useState('');
-  const update = async () => {
-    const res = await postProgressUpdate({ userId, skillId: Number(skillId), level: Number(level) });
-    setMsg(res?.message || 'Updated');
-  };
-  return (
-    <section style={{ background: colors.surface, border: `1px solid ${colors.border}`, borderRadius: 12, boxShadow: colors.shadow, padding: 16 }}>
-      <h2 style={{ marginTop: 0, color: colors.primary }}>Progress</h2>
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        <label>User ID: <input value={userId} onChange={(e) => setUserId(e.target.value)} /></label>
-        <label>Skill ID: <input type="number" value={skillId} onChange={(e) => setSkillId(e.target.value)} /></label>
-        <label>Level (0-5): <input type="number" min="0" max="5" value={level} onChange={(e) => setLevel(e.target.value)} /></label>
-        <button style={styles.btnPrimary} onClick={update}>Update</button>
-      </div>
-      {msg && <div style={{ marginTop: 8, color: colors.success }}>{msg}</div>}
-    </section>
-  );
-}
+/* ProgressPage component moved to pages/ProgressPage.js */
 
 // Connectivity Panel preserved
 function ConnectivityPanel() {
