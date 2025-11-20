@@ -77,6 +77,8 @@ export function getWsBase() {
   };
   // eslint-disable-next-line no-console
   console.info("[RuntimeConfig] Resolved API endpoints:", info);
+  // eslint-disable-next-line no-console
+  console.info("[RuntimeConfig] Active API base:", info.resolvedApiBase);
 })();
 
 // PUBLIC_INTERFACE
